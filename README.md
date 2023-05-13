@@ -1,7 +1,7 @@
 customer-segmentation
 ==============================
 
-develop a customer segmentation to define the best marketing strategy
+Develop a customer segmentation to define the best marketing strategy
 
 
 
