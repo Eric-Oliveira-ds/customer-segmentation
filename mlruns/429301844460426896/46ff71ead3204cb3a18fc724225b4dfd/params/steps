@@ -1,0 +1,1 @@
+[('scaler', StandardScaler()), ('kmeans', KMeans(random_state=42))]
