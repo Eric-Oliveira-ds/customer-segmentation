@@ -1,0 +1,15 @@
+artifact_uri: mlflow-artifacts:/621413931314277664/6acef7f5f63d45e98f2e0bde58390a8b/artifacts
+end_time: 1684275417164
+entry_point_name: ''
+experiment_id: '621413931314277664'
+lifecycle_stage: active
+run_id: 6acef7f5f63d45e98f2e0bde58390a8b
+run_name: DBSCAN - 16/05/2023 19:16:53
+run_uuid: 6acef7f5f63d45e98f2e0bde58390a8b
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1684275413304
+status: 3
+tags: []
+user_id: erico

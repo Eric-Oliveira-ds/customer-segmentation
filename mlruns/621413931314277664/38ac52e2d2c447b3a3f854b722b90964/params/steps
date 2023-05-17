@@ -1,0 +1,1 @@
+[('scaler', StandardScaler()), ('DBSCAN', DBSCAN(eps=0.99, min_samples=4))]
