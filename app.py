@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import joblib
 import streamlit as st
-from st_aggrid import AgGrid
+from st_aggrid import AgGrid, GridOptionsBuilder
 import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
@@ -14,7 +14,7 @@ from dotenv import load_dotenv
 
 # Autenticação
 
-
+@st.cache_data
 # Criar conexão com MySQL
 def get_data():
     engine = create_engine('mysql+pymysql://admin:1234@localhost:3306/Bank_Credit_Card')
@@ -23,10 +23,13 @@ def get_data():
 
     return df
 
+
 def data_viz():
     # Obter os dados
     df = get_data()
+
     df_viz = df.set_index('CUST_ID')
+    df_viz.drop(['CLUSTER_KMEANS_PCA'],axis=1, inplace=True)
 
     # Texto que explica a segmentação de cada cluster
     st.markdown(""" 
@@ -51,7 +54,7 @@ def data_viz():
     # Gráfico polar de média das variáveis por cluster
     # Seletor de colunas
     selected_column = st.selectbox('Selecione a coluna para analisar o gráfico abaixo:', list(df_viz.columns))
-    
+    st.markdown(""" #### Visão de segmentação por média das variáveis:""")
     fig = make_subplots(rows=2, cols=2, subplot_titles=df['SEGMENTATION'].unique(), specs=[[{'type': 'polar'}]*2]*2)
 
     angles = list(df_viz.columns)
@@ -59,7 +62,8 @@ def data_viz():
 
     row = 1
     col = 1
-    for segment in df_viz['SEGMENTATION'].unique():
+    colors = ['gold', 'green', 'blue', 'red']
+    for i, segment in enumerate(df_viz['SEGMENTATION'].unique()):
         subset = df_viz[df_viz['SEGMENTATION'] == segment]
         data = [np.mean(subset[col]) for col in subset.columns[:-2]]
         data.append(data[0])
@@ -67,8 +71,10 @@ def data_viz():
         fig.add_trace(go.Scatterpolar(
             r=data,
             theta=angles,
+            mode = 'markers',
             fill='toself',
-            name="Segmentation: " + segment
+            name="Segmentation: " + segment,
+            line=dict(color=colors[i])
         ), row=row, col=col)
         
         col += 1
@@ -91,6 +97,23 @@ def data_viz():
     )
     
     st.plotly_chart(fig)
+
+    # Tabela Agggrid
+    st.markdown(""" #### Amostras segmentadas - Use os filtros para obter insights !""")
+    # Adiciona um seletor de quantidade de linhas
+    num_rows = st.slider("Selecione o número de linhas", min_value=10, max_value=100, value=10, step=10)
+
+    # Aplica filtros aleatórios ao DataFrame
+    filtered_df = df.sample(n=num_rows, random_state=42)
+    # Constrói as opções do Ag-Grid
+    grid_options_builder = GridOptionsBuilder.from_dataframe(filtered_df)
+    grid_options = grid_options_builder.build()
+
+    # Renderiza o Ag-Grid
+    with st.expander("Visualizar dados"):
+        AgGrid(filtered_df, gridOptions=grid_options)
+
+
 
 
 
