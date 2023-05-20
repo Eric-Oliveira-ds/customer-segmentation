@@ -36,7 +36,7 @@ def data_viz():
     # Renderização do gráfico
     st.plotly_chart(fig)
 
-    # Gráfico polar de média das variáveis por cluster
+    # Gráfico de média das variáveis por cluster
     st.markdown(""" #### Visão de segmentação por média das variáveis:""")
     # Seletor de colunas
     selected_columns = st.multiselect("Selecione as variáveis para analisar", df_viz.columns[:-1])
@@ -144,7 +144,6 @@ def main_page():
     data_viz()
 
 
-
 def main():
 
     # Definir as rotas
@@ -155,6 +154,15 @@ def main():
 
     # Executar a página selecionada
     routes[page]()
+
+    # Adicionar imagem na barra lateral
+    image = r"..\customer-segmentation\6155818.jpg"
+    st.sidebar.image(image, caption='freepik', use_column_width=True)
+    st.sidebar.markdown("---")
+    st.sidebar.markdown("Autor: Eric Oliveira")
+    st.sidebar.markdown("[LinkedIn](https://www.linkedin.com/in/eric-oliveira-ds/)")
+
+
 
 if __name__ == '__main__':
     main()
