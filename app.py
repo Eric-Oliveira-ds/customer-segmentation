@@ -1,7 +1,5 @@
 import pandas as pd
 import numpy as np
-import joblib
-from sklearn.preprocessing import MinMaxScaler
 import streamlit as st
 from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode, DataReturnMode
 import plotly.express as px
@@ -10,8 +8,6 @@ from plotly.subplots import make_subplots
 
 from sqlalchemy import create_engine, text
 import sqlalchemy
-import os
-from dotenv import load_dotenv
 
 # Configurar o Streamlit para o modo wide (largura total) por padrão
 st.set_page_config(layout="wide")
@@ -43,7 +39,7 @@ def data_viz():
     # Gráfico polar de média das variáveis por cluster
     st.markdown(""" #### Visão de segmentação por média das variáveis:""")
     # Seletor de colunas
-    selected_columns = st.multiselect("Selecione as colunas", df_viz.columns[:-1])
+    selected_columns = st.multiselect("Selecione as variáveis para analisar", df_viz.columns[:-1])
     # Filtra o DataFrame com base nas colunas selecionadas
     df_filtered = df_viz[selected_columns + ['SEGMENTATION']]
 
