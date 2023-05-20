@@ -1,8 +1,9 @@
 import pandas as pd
 import numpy as np
 import joblib
+from sklearn.preprocessing import MinMaxScaler
 import streamlit as st
-from st_aggrid import AgGrid, GridOptionsBuilder
+from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode, DataReturnMode
 import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
@@ -12,7 +13,8 @@ import sqlalchemy
 import os
 from dotenv import load_dotenv
 
-# Autenticação
+# Configurar o Streamlit para o modo wide (largura total) por padrão
+st.set_page_config(layout="wide")
 
 @st.cache_data
 # Criar conexão com MySQL
@@ -23,25 +25,13 @@ def get_data():
 
     return df
 
-
 def data_viz():
     # Obter os dados
     df = get_data()
 
+    # selecionar dataframe para visualização de dados
     df_viz = df.set_index('CUST_ID')
     df_viz.drop(['CLUSTER_KMEANS_PCA'],axis=1, inplace=True)
-
-    # Texto que explica a segmentação de cada cluster
-    st.markdown(""" 
-            #### Vip:
-            Pagam legal as faturas e têm maior tempo no banco, além de terem o limite de crédito maior.
-            #### Plus:
-            Segundos melhores pagadores de fatura do cartão. 
-            #### Mid:
-            Menor limite de credito, mas ainda assim pagam as faturas em uma taxa mínima.
-            #### Low:
-            Taxa negativa de pagamento da fatura, clientes problemáticos.
-            """)
 
     # Número de clientes segmentados por grupo
     fig = px.bar(df_viz['SEGMENTATION'].value_counts(), title="Número de clientes segmentados por grupo")
@@ -50,81 +40,114 @@ def data_viz():
     # Renderização do gráfico
     st.plotly_chart(fig)
 
-
     # Gráfico polar de média das variáveis por cluster
-    # Seletor de colunas
-    selected_column = st.selectbox('Selecione a coluna para analisar o gráfico abaixo:', list(df_viz.columns))
     st.markdown(""" #### Visão de segmentação por média das variáveis:""")
-    fig = make_subplots(rows=2, cols=2, subplot_titles=df['SEGMENTATION'].unique(), specs=[[{'type': 'polar'}]*2]*2)
+    # Seletor de colunas
+    selected_columns = st.multiselect("Selecione as colunas", df_viz.columns[:-1])
+    # Filtra o DataFrame com base nas colunas selecionadas
+    df_filtered = df_viz[selected_columns + ['SEGMENTATION']]
 
-    angles = list(df_viz.columns)
-    layoutdict = dict(radialaxis=dict(visible=True, range=[0, 1]))
-
+    fig = make_subplots(rows=2, cols=2, subplot_titles=df_filtered['SEGMENTATION'].unique(), specs=[[{'type': 'bar'}]*2]*2)
+    layoutdict = dict(xaxis=dict(visible=False), yaxis=dict(visible=False))
     row = 1
     col = 1
     colors = ['gold', 'green', 'blue', 'red']
-    for i, segment in enumerate(df_viz['SEGMENTATION'].unique()):
-        subset = df_viz[df_viz['SEGMENTATION'] == segment]
-        data = [np.mean(subset[col]) for col in subset.columns[:-2]]
-        data.append(data[0])
-        
-        fig.add_trace(go.Scatterpolar(
-            r=data,
-            theta=angles,
-            mode = 'markers',
-            fill='toself',
+    for i, segment in enumerate(df_filtered['SEGMENTATION'].unique()):
+        subset = df_filtered[df_filtered['SEGMENTATION'] == segment]
+        data = [np.mean(subset[col]) for col in subset.columns[:-1]]
+
+        fig.add_trace(go.Bar(
+            x=selected_columns,
+            y=data,
             name="Segmentation: " + segment,
-            line=dict(color=colors[i])
+            marker=dict(color=colors[i])
         ), row=row, col=col)
-        
+
         col += 1
         if col > 2:
             col = 1
             row += 1
 
     fig.update_layout(
-        polar=dict(
-            radialaxis=dict(
-                visible=True,
-                range=[0, 1],
-                tickfont=dict(size=6)  
-            )
-        ),
         showlegend=True,
-        height=700,
-        width=1100,
+        height=800,
+        width=1400,
         template="plotly"
     )
-    
+
+    fig.update_layout(
+        font=dict(size=10)
+    )
+
     st.plotly_chart(fig)
 
+
+
     # Tabela Agggrid
-    st.markdown(""" #### Amostras segmentadas - Use os filtros para obter insights !""")
-    # Adiciona um seletor de quantidade de linhas
-    num_rows = st.slider("Selecione o número de linhas", min_value=10, max_value=100, value=10, step=10)
-
-    # Aplica filtros aleatórios ao DataFrame
-    filtered_df = df.sample(n=num_rows, random_state=42)
-    # Constrói as opções do Ag-Grid
-    grid_options_builder = GridOptionsBuilder.from_dataframe(filtered_df)
-    grid_options = grid_options_builder.build()
-
+    st.markdown(""" #### Base de dados dos clientes que têm cartão de crédito:""")
     # Renderiza o Ag-Grid
-    with st.expander("Visualizar dados"):
-        AgGrid(filtered_df, gridOptions=grid_options)
+    with st.expander("Visualizar e aplicar filtros na tabela"):
+        # Define a largura do contêiner da tabela
+        st.write(
+                f'<style>.st-aggrid-wrapper .stAgGrid > div, .st-aggrid-wrapper .stAgGrid > div .slick-header-columns, '
+                f'.st-aggrid-wrapper .stAgGrid > div .slick-viewport {{"width": "100%"}}</style>',
+                unsafe_allow_html=True
+        )
+        # Configurações do AgGrid
+        gb = GridOptionsBuilder.from_dataframe(df)
+        gb.configure_default_column(groupable=True, value=True, enableRowGroup=True, aggFunc='sum', editable=True)
+        gridOptions = gb.build()
+        # Função para aplicar os filtros no DataFrame
+        def apply_filters(grid_df):
+            filters = []
+            for column in grid_df.columns:
+                if column in grid_df.select_dtypes(include=["object"]).columns:
+                    values = st.multiselect(f"Selecione os valores para '{column}'", grid_df[column].unique().tolist())
+                    if values:
+                        filters.append(grid_df[column].isin(values))
+                else:
+                    min_val = grid_df[column].min()
+                    max_val = grid_df[column].max()
+                    selected_range = st.slider(f"Selecione o intervalo para '{column}'", min_val, max_val, (min_val, max_val))
+                    filters.append((grid_df[column] >= selected_range[0]) & (grid_df[column] <= selected_range[1]))
+            
+            if filters:
+                return grid_df.loc[pd.concat(filters, axis=1).all(axis=1)]
+            else:
+                return grid_df
+
+        # Cria o AgGridWidget com as configurações e os dados iniciais
+        grid_response = AgGrid(
+            df,
+            gridOptions=gridOptions,
+            width='100%',
+            height='500px',
+            enable_enterprise_modules=True,
+            allow_unsafe_jscode=True
+        )
+
+        # Aplica os filtros e atualiza o grid quando o botão "Filtrar" for pressionado
+        if 'event_type' in grid_response and grid_response['event_type'] == 'buttonClicked':
+            filtered_df = apply_filters(grid_response['data'])
+            grid_response = AgGrid(
+                filtered_df,
+                gridOptions=gridOptions,
+                width='100%',
+                height='500px',
+                enable_enterprise_modules=True,
+                allow_unsafe_jscode=True
+            )
 
 
 
-
-
-
-
-# Página principals
+# Página principal
 def main_page():
     st.title("Segmentação de clientes por uso do cartão de crédito")
 
     # Chamar a função de visualização de dados
     data_viz()
+
+
 
 def main():
 
