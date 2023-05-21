@@ -60,6 +60,9 @@ Develop a customer segmentation to define the best marketing strategy
 
     Using mlflow for tracking experiments and evaluate model with sillhute score. The score is bad now but the algorthem predict four cluster. I make a segmenatiom with this four cluster predicted and add into Streamlit a dashboard with analytical vizualizations and table for user best decision make.
 
+- **Solution:**
+
+    A web app was created that enhances the decision making of the marketing team through interactive analysis of data and grouping of vip, plus, mid and low customers, thus creating strategies and personalized products for customers.
 
 
 <p><small>Project based on the <a target="_blank" href="https://drivendata.github.io/cookiecutter-data-science/">cookiecutter data science project template</a>. #cookiecutterdatascience</small></p>
