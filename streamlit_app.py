@@ -14,9 +14,8 @@ from sqlalchemy import create_engine, text
 import sqlalchemy
 
 # Carrega as variáveis de ambiente do arquivo .env
-path_dotenv = '.env'
-load_dotenv(path_dotenv)
-senha_banco_dados = os.environ.get('MYSQL_PASSWORD')
+load_dotenv()
+senha_banco_dados = os.getenv('MYSQL_PASSWORD')
 
 # Configurar o Streamlit para o modo wide (largura total) por padrão
 st.set_page_config(layout="wide")
