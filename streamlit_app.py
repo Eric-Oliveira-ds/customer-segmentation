@@ -14,7 +14,8 @@ from sqlalchemy import create_engine, text
 import sqlalchemy
 
 # Carrega as variáveis de ambiente do arquivo .env
-load_dotenv()
+path_dotenv = '.env'
+load_dotenv(path_dotenv)
 senha_banco_dados = os.environ.get('MYSQL_PASSWORD')
 
 # Configurar o Streamlit para o modo wide (largura total) por padrão
@@ -24,7 +25,7 @@ st.set_page_config(layout="wide")
 # Criar conexão com MySQL
 def get_data():
 
-    ssl_args = {'ssl_ca': '../cacert-2023-01-10.pem'}
+    ssl_args = {'ssl_ca': 'cacert-2023-01-10.pem'}
     engine = create_engine('mysql+pymysql://2og9lykdi1kfw9a9g7r2:'+ senha_banco_dados +'@aws.connect.psdb.cloud:3306/projeto_clusterizacao', connect_args=ssl_args)
     query = 'SELECT * FROM customer_credit_card'
     df = pd.read_sql_query(sql=text(query), con=engine.connect())
