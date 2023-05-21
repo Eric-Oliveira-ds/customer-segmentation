@@ -1,7 +1,11 @@
 import pandas as pd
 import numpy as np
+import os
+from dotenv import load_dotenv
+
 import streamlit as st
 from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode, DataReturnMode
+
 import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
@@ -9,13 +13,19 @@ from plotly.subplots import make_subplots
 from sqlalchemy import create_engine, text
 import sqlalchemy
 
+# Carrega as variáveis de ambiente do arquivo .env
+load_dotenv()
+senha_banco_dados = os.environ.get('MYSQL_PASSWORD')
+
 # Configurar o Streamlit para o modo wide (largura total) por padrão
 st.set_page_config(layout="wide")
 
 @st.cache_data
 # Criar conexão com MySQL
 def get_data():
-    engine = create_engine('mysql+pymysql://admin:1234@localhost:3306/Bank_Credit_Card')
+
+    ssl_args = {'ssl_ca': '../cacert-2023-01-10.pem'}
+    engine = create_engine('mysql+pymysql://2og9lykdi1kfw9a9g7r2:'+ senha_banco_dados +'@aws.connect.psdb.cloud:3306/projeto_clusterizacao', connect_args=ssl_args)
     query = 'SELECT * FROM customer_credit_card'
     df = pd.read_sql_query(sql=text(query), con=engine.connect())
 

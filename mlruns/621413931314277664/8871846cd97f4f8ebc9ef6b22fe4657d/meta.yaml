@@ -1,0 +1,15 @@
+artifact_uri: mlflow-artifacts:/621413931314277664/8871846cd97f4f8ebc9ef6b22fe4657d/artifacts
+end_time: 1684708532396
+entry_point_name: ''
+experiment_id: '621413931314277664'
+lifecycle_stage: active
+run_id: 8871846cd97f4f8ebc9ef6b22fe4657d
+run_name: Kmeans 4 - 21/05/2023 19:35:25
+run_uuid: 8871846cd97f4f8ebc9ef6b22fe4657d
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1684708527313
+status: 3
+tags: []
+user_id: erico
