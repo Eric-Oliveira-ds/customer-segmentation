@@ -176,6 +176,5 @@ def main():
     st.sidebar.markdown("[LinkedIn](https://www.linkedin.com/in/eric-oliveira-ds/)")
 
 
-
 if __name__ == '__main__':
     main()
