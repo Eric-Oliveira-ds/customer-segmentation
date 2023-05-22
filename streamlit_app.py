@@ -29,7 +29,7 @@ st.set_page_config(layout="wide")
 def get_data():
 
     ssl_args = {'ssl_ca': 'cacert-2023-01-10.pem'}
-    engine = create_engine(f'mysql+pymysql://{db_user}:{db_password}@{db_host}:3306/{database}', connect_args=ssl_args)
+    engine = create_engine(f'mysql+pymysql://{db_user}:{db_password}@{server}:3306/{database}', connect_args=ssl_args)
     query = 'SELECT * FROM customer_credit_card'
     df = pd.read_sql_query(sql=text(query), con=engine.connect())
 
