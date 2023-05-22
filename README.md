@@ -3,7 +3,7 @@ customer-segmentation
 
 Develop a customer segmentation to define the best marketing strategy
 
-- [**Streamlit web app**]()
+- [**Streamlit web app**](https://eric-oliveira-ds-customer-segmentation-streamlit-app-59dtbw.streamlit.app/)
 
 
 - **Business problem:**
