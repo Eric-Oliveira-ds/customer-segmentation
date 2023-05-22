@@ -42,6 +42,7 @@ def data_viz():
     # selecionar dataframe para visualização de dados
     df_viz = df.set_index('CUST_ID')
     df_viz.drop(['CLUSTER_KMEANS_PCA'],axis=1, inplace=True)
+    df_viz = df_viz.sort_values(by='SEGMENTATION', ascending=False)
 
     # Número de clientes segmentados por grupo
     fig = px.bar(df_viz['SEGMENTATION'].value_counts(), title="Número de clientes segmentados por grupo")
