@@ -16,9 +16,10 @@ import sqlalchemy
 # Carrega as variáveis de ambiente do arquivo .env
 load_dotenv()
 # Definir os padrões para as configurações do banco de dados
-db_host = os.getenv('DB_HOST')
-db_user = os.getenv('DB_USER')
-db_password = os.getenv('DB_PASSWORD')
+server = os.getenv('server')
+db_user = os.getenv('db_username')
+db_password = os.getenv('db_password')
+database = os.getenv('database')
 
 # Configurar o Streamlit para o modo wide (largura total) por padrão
 st.set_page_config(layout="wide")
@@ -28,7 +29,7 @@ st.set_page_config(layout="wide")
 def get_data():
 
     ssl_args = {'ssl_ca': 'cacert-2023-01-10.pem'}
-    engine = create_engine(f'mysql+pymysql://{db_user}:{db_password}@{db_host}:3306/projeto_clusterizacao', connect_args=ssl_args)
+    engine = create_engine(f'mysql+pymysql://{db_user}:{db_password}@{db_host}:3306/{database}', connect_args=ssl_args)
     query = 'SELECT * FROM customer_credit_card'
     df = pd.read_sql_query(sql=text(query), con=engine.connect())
 
