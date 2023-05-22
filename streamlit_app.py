@@ -170,7 +170,7 @@ def main():
     routes[page]()
 
     # Adicionar imagem na barra lateral
-    image = r"..\customer-segmentation\6155818.jpg"
+    image = "https://github.com/Eric-Oliveira-ds/customer-segmentation/blob/main/6155818.jpg"
     st.sidebar.image(image, caption='freepik', use_column_width=True)
     st.sidebar.markdown("---")
     st.sidebar.markdown("Autor: Eric Oliveira")
